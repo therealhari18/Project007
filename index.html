@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mood Stamps</title>
     
-    <!-- ✅ PASTE YOUR IMAGE LINK HERE FOR FAVICON -->
-    <link rel="icon" href="INSERT_YOUR_LOGO_LINK_HERE" type="image/png">
+    <!-- ✅ 1. BROWSER TAB ICON (Points to your local file) -->
+    <link rel="icon" href="logo.png" type="image/png">
     
-    <!-- 📱 MAKE IT AN APP (Manifest Meta Tags) -->
+    <!-- 📱 2. MAKE IT AN APP (Manifest Meta Tags) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#f0f4f8">
@@ -20,11 +20,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap');
 
         :root {
-            --bg-color: #f0f4f8;
-            --paper-color: #ffffff;
-            --text-color: #2d3436;
-            
-            /* Mood Colors */
+            --bg-color: #f0f4f8; --paper-color: #ffffff; --text-color: #2d3436;
             --m1: #636e72; --m2: #74b9ff; --m3: #a29bfe; 
             --m4: #dfe6e9; --m5: #55efc4; --m6: #fdcb6e; --m7: #ff7675;
         }
@@ -38,7 +34,6 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            /* Prevent pull-to-refresh on mobile app feel */
             overscroll-behavior-y: none; 
         }
 
@@ -48,7 +43,6 @@
             width: 100%; max-width: 600px;
             display: flex; justify-content: space-between; align-items: center;
             padding: 20px; box-sizing: border-box;
-            /* Safe area for iPhone notch */
             padding-top: env(safe-area-inset-top, 20px);
         }
 
@@ -168,8 +162,8 @@
 
 <header>
     <div class="logo-area">
-        <!-- ✅ PASTE YOUR IMAGE LINK HERE FOR HEADER -->
-        <img src="INSERT_YOUR_LOGO_LINK_HERE" alt="Logo" class="app-logo">
+        <!-- ✅ 3. APP HEADER LOGO (Points to your local file) -->
+        <img src="logo.png" alt="Logo" class="app-logo">
         <h1>Mood Stamps</h1>
     </div>
     <button class="nav-btn" id="toggleViewBtn" onclick="toggleView()">View Year</button>
@@ -209,8 +203,8 @@
         <h2 id="shareDate">Date</h2>
         <p>My Mood Today</p>
         <div class="share-footer">
-            <!-- ✅ PASTE YOUR IMAGE LINK HERE FOR SHARE CARD -->
-            <img src="INSERT_YOUR_LOGO_LINK_HERE" class="share-logo">
+            <!-- ✅ 4. SHARE CARD LOGO (Points to your local file) -->
+            <img src="logo.png" class="share-logo">
             <span>Mood Stamps App</span>
         </div>
     </div>
