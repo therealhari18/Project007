@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Stamp Collection</title>
+    <!-- Screen Capture Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #f0f4f8;
+            --paper-color: #ffffff;
+            --text-color: #2d3436;
+            
+            /* Mood Colors */
+            --m1: #636e72; --m2: #74b9ff; --m3: #a29bfe; 
+            --m4: #dfe6e9; --m5: #55efc4; --m6: #fdcb6e; --m7: #ff7675;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 { font-family: 'Fredoka', sans-serif; margin: 0; }
+
+        header {
+            width: 100%; max-width: 600px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px;
+        }
+
+        .nav-btn {
+            background: white; border: 2px solid var(--text-color);
+            padding: 8px 16px; border-radius: 20px;
+            cursor: pointer; font-weight: bold;
+            box-shadow: 2px 2px 0px var(--text-color);
+        }
+        .nav-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+
+        .album-page {
+            background: var(--paper-color);
+            width: 90%; max-width: 500px;
+            padding: 20px; border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        /* --- Minting Station --- */
+        .mint-station {
+            text-align: center; margin-bottom: 30px; padding-bottom: 20px;
+            border-bottom: 2px dashed #b2bec3;
+        }
+
+        .mood-selector {
+            display: flex; justify-content: center; gap: 8px;
+            margin-top: 15px; flex-wrap: wrap;
+        }
+
+        .mood-opt {
+            font-size: 1.5rem; width: 45px; height: 45px;
+            border: none; border-radius: 50%; cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .mood-opt:hover { transform: scale(1.2) rotate(10deg); }
+
+        /* Share Button */
+        .share-btn {
+            background: var(--text-color); color: white;
+            border: none; padding: 10px 20px;
+            border-radius: 50px; font-weight: bold;
+            margin-top: 15px; cursor: pointer; display: none; /* Hidden initially */
+            align-items: center; justify-content: center; gap: 8px;
+        }
+        .share-btn:hover { background: #000; }
+
+        /* --- Stamp Grid --- */
+        .month-header { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center; }
+        .stamp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+
+        .stamp-slot {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; color: #b2bec3;
+            border: 1px dashed #ced6e0; border-radius: 4px; position: relative;
+        }
+
+        .stamp {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            animation: stampDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px dotted white; 
+            outline: 1px solid rgba(0,0,0,0.05);
+        }
+
+        @keyframes stampDown { 0% { transform: scale(2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .stamp-date { position: absolute; bottom: 2px; right: 2px; font-size: 0.5rem; color: rgba(255,255,255,0.8); }
+
+        /* --- Hidden Element for Screenshot Generation --- */
+        #shareCardTemplate {
+            position: fixed; left: -9999px; top: 0;
+            width: 300px; height: 400px;
+            background: #fff;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 20px; box-sizing: border-box;
+            border: 15px solid white;
+            background-color: #f0f4f8; /* Inner bg */
+        }
+        
+        .share-stamp-visual {
+            width: 150px; height: 150px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 4rem; color: white;
+            border: 6px dotted white;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transform: rotate(-5deg);
+        }
+
+        .share-text { text-align: center; color: var(--text-color); font-family: 'Fredoka', sans-serif; }
+
+        /* --- Year View & Advice --- */
+        .year-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .month-card { border: 1px solid #dfe6e9; border-radius: 8px; padding: 10px; text-align: center; background: #fafafa; }
+        .big-stamp { width: 60px; height: 60px; margin: 0 auto; font-size: 2rem; }
+        .hidden { display: none; }
+        .advice-box { background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Mood Stamps 📮</h1>
+    <button class="nav-btn" id="toggleViewBtn" onclick="toggleView()">View Year</button>
+</header>
+
+<div class="album-page">
+    
+    <!-- MONTH VIEW -->
+    <div id="monthView">
+        <div class="mint-station" id="inputSection">
+            <h3>Mint Today's Stamp</h3>
+            <div class="mood-selector">
+                <button class="mood-opt" style="background:var(--m1)" onclick="addStamp(1)">😭</button>
+                <button class="mood-opt" style="background:var(--m2)" onclick="addStamp(2)">😢</button>
+                <button class="mood-opt" style="background:var(--m3)" onclick="addStamp(3)">😕</button>
+                <button class="mood-opt" style="background:var(--m4)" onclick="addStamp(4)">😐</button>
+                <button class="mood-opt" style="background:var(--m5)" onclick="addStamp(5)">🙂</button>
+                <button class="mood-opt" style="background:var(--m6)" onclick="addStamp(6)">😄</button>
+                <button class="mood-opt" style="background:var(--m7)" onclick="addStamp(7)">🤩</button>
+            </div>
+            <p id="statusMsg" style="font-size:0.8rem; margin-top:5px; color:#b2bec3;">Select a mood to stick it!</p>
+            
+            <!-- SHARE BUTTON -->
+            <button id="shareBtn" class="share-btn" onclick="shareMood()">
+                📤 Share & Invite
+            </button>
+        </div>
+
+        <div class="month-header">
+            <h2 id="currentMonthLabel">Month Year</h2>
+        </div>
+
+        <div class="stamp-grid" id="stampGrid"></div>
+
+        <div class="advice-box" id="adviceBox">
+            <strong>Monthly Insight:</strong> <span id="adviceText"></span>
+        </div>
+    </div>
+
+    <!-- YEAR VIEW -->
+    <div id="yearView" class="hidden">
+        <h2 style="text-align: center; margin-bottom: 20px;">My Collection</h2>
+        <div class="year-grid" id="yearGrid"></div>
+    </div>
+</div>
+
+<!-- TEMPLATE FOR GENERATING IMAGE (Hidden from user) -->
+<div id="shareCardTemplate">
+    <div class="share-stamp-visual" id="shareVisual">😐</div>
+    <div class="share-text">
+        <h2 id="shareDate">Oct 24</h2>
+        <p>My Mood Today</p>
+        <p style="margin-top:20px; font-size:0.8rem; color:#636e72;">Join me on<br><strong>Mood Stamps App</strong></p>
+    </div>
+</div>
+
+<script>
+    const moodConfig = {
+        1: { emoji: '😭', color: 'var(--m1)', name: 'Rough' },
+        2: { emoji: '😢', color: 'var(--m2)', name: 'Sad' },
+        3: { emoji: '😕', color: 'var(--m3)', name: 'Meh' },
+        4: { emoji: '😐', color: 'var(--m4)', name: 'Neutral' },
+        5: { emoji: '🙂', color: 'var(--m5)', name: 'Good' },
+        6: { emoji: '😄', color: 'var(--m6)', name: 'Happy' },
+        7: { emoji: '🤩', color: 'var(--m7)', name: 'Ecstatic' }
+    };
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let currentDate = new Date();
+    let displayYear = currentDate.getFullYear();
+    let displayMonth = currentDate.getMonth();
+
+    // Track current selection for sharing
+    let lastSelectedMood = null;
+
+    document.addEventListener('DOMContentLoaded', () => { renderMonth(); });
+
+    function getStorage() { return JSON.parse(localStorage.getItem('moodStampCollection')) || {}; }
+
+    function addStamp(level) {
+        const db = getStorage();
+        const today = new Date();
+        const key = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        
+        db[key] = level;
+        localStorage.setItem('moodStampCollection', JSON.stringify(db));
+        
+        // Update UI
+        document.getElementById('statusMsg').innerText = "Stamp pasted! ✨";
+        
+        // Enable Share Button
+        lastSelectedMood = level;
+        const shareBtn = document.getElementById('shareBtn');
+        shareBtn.style.display = "inline-flex";
+        
+        renderMonth();
+    }
+
+    // --- SHARE FEATURE LOGIC ---
+    async function shareMood() {
+        if (!lastSelectedMood) return;
+
+        const shareBtn = document.getElementById('shareBtn');
+        const originalText = shareBtn.innerText;
+        shareBtn.innerText = "Generating...";
+
+        // 1. Prepare the Hidden Card
+        const visual = document.getElementById('shareVisual');
+        const dateTxt = document.getElementById('shareDate');
+        const data = moodConfig[lastSelectedMood];
+        const today = new Date();
+        
+        visual.style.backgroundColor = data.color;
+        visual.innerText = data.emoji;
+        dateTxt.innerText = `${months[today.getMonth()]} ${today.getDate()}`;
+
+        // 2. Convert DOM to Canvas (Take Screenshot)
+        try {
+            const canvas = await html2canvas(document.querySelector("#shareCardTemplate"), {
+                scale: 2 // High resolution
+            });
+
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], 'my-mood-stamp.png', { type: 'image/png' });
+                
+                // 3. Invite Text
+                const shareData = {
+                    title: 'Mood Stamps',
+                    text: `I'm feeling ${data.name} today. Track your mood collection with me!`,
+                    files: [file]
+                };
+
+                // 4. Trigger Native Share
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share(shareData);
+                        shareBtn.innerText = "Shared! 📮";
+                    } catch (err) {
+                        console.log("Share cancelled");
+                        shareBtn.innerText = originalText;
+                    }
+                } else {
+                    // Fallback for Desktop (Download image)
+                    const link = document.createElement('a');
+                    link.download = 'my-mood-stamp.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                    alert("Image downloaded! You can now send it to your friends manually.");
+                    shareBtn.innerText = originalText;
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            alert("Oops, couldn't generate the image.");
+            shareBtn.innerText = originalText;
+        }
+    }
+
+    function renderMonth() {
+        const db = getStorage();
+        const grid = document.getElementById('stampGrid');
+        const monthLabel = document.getElementById('currentMonthLabel');
+        const adviceBox = document.getElementById('adviceBox');
+        
+        grid.innerHTML = "";
+        monthLabel.innerText = `${months[displayMonth]} ${displayYear}`;
+
+        const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
+        let moodCounts = {};
+        let totalLogged = 0;
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayKey = `${displayYear}-${String(displayMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            const moodLevel = db[dayKey];
+            const slot = document.createElement('div');
+            slot.className = 'stamp-slot';
+
+            if (moodLevel) {
+                const stamp = document.createElement('div');
+                stamp.className = `stamp`;
+                stamp.style.backgroundColor = moodConfig[moodLevel].color;
+                stamp.innerHTML = `${moodConfig[moodLevel].emoji} <span class="stamp-date">${i}</span>`;
+                slot.style.border = "none";
+                slot.appendChild(stamp);
+                moodCounts[moodLevel] = (moodCounts[moodLevel] || 0) + 1;
+                totalLogged++;
+            } else {
+                slot.innerText = i;
+            }
+            grid.appendChild(slot);
+        }
+
+        if (totalLogged > 0) {
+            let maxMood = 4;
+            let maxCount = 0;
+            for (const [lvl, count] of Object.entries(moodCounts)) {
+                if (count > maxCount) { maxCount = count; maxMood = lvl; }
+            }
+            adviceBox.style.display = "block";
+            // Simple advice text
+            document.getElementById('adviceText').innerText = `Dominant mood: ${moodConfig[maxMood].name}. Keep filling your album!`;
+        } else {
+            adviceBox.style.display = "none";
+        }
+    }
+
+    function renderYear() {
+        const db = getStorage();
+        const grid = document.getElementById('yearGrid');
+        grid.innerHTML = "";
+
+        for (let m = 0; m < 12; m++) {
+            const monthCard = document.createElement('div');
+            monthCard.className = 'month-card';
+            let moodCounts = {};
+            let hasData = false;
+
+            for(let d=1; d<=31; d++) {
+                const key = `${displayYear}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                if(db[key]) {
+                    moodCounts[db[key]] = (moodCounts[db[key]] || 0) + 1;
+                    hasData = true;
+                }
+            }
+
+            let content = `<div style="height:60px; display:flex; align-items:center; justify-content:center; color:#ccc;">Empty</div>`;
+            if (hasData) {
+                let winner = 4;
+                let max = 0;
+                for (const [lvl, count] of Object.entries(moodCounts)) {
+                    if (count > max) { max = count; winner = lvl; }
+                }
+                content = `<div class="stamp big-stamp" style="background:${moodConfig[winner].color}">${moodConfig[winner].emoji}</div>`;
+            }
+            monthCard.innerHTML = `<h4>${months[m]}</h4>${content}`;
+            grid.appendChild(monthCard);
+        }
+    }
+
+    function toggleView() {
+        const m = document.getElementById('monthView');
+        const y = document.getElementById('yearView');
+        const btn = document.getElementById('toggleViewBtn');
+
+        if (m.classList.contains('hidden')) {
+            m.classList.remove('hidden'); y.classList.add('hidden'); btn.innerText = "View Year"; renderMonth();
+        } else {
+            m.classList.add('hidden'); y.classList.remove('hidden'); btn.innerText = "View Month"; renderYear();
+        }
+    }
+</script>
+
+</body>
+</html>
