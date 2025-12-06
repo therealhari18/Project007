@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mood Stamps</title>
     
-    <!-- ✅ 1. BROWSER TAB ICON (Points to your local file) -->
+    <!-- ✅ PWA Settings -->
     <link rel="icon" href="logo.png" type="image/png">
-    
-    <!-- 📱 2. MAKE IT AN APP (Manifest Meta Tags) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f0f4f8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#f0f4f8">
-    <meta name="mobile-web-app-capable" content="yes">
     
     <!-- Screen Capture Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -162,7 +160,6 @@
 
 <header>
     <div class="logo-area">
-        <!-- ✅ 3. APP HEADER LOGO (Points to your local file) -->
         <img src="logo.png" alt="Logo" class="app-logo">
         <h1>Mood Stamps</h1>
     </div>
@@ -203,7 +200,6 @@
         <h2 id="shareDate">Date</h2>
         <p>My Mood Today</p>
         <div class="share-footer">
-            <!-- ✅ 4. SHARE CARD LOGO (Points to your local file) -->
             <img src="logo.png" class="share-logo">
             <span>Mood Stamps App</span>
         </div>
@@ -231,6 +227,19 @@
         renderMonth();
         restoreTodayUI();
     });
+
+    // ✅ SERVICE WORKER REGISTRATION (Offline Capability)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('SW Registered:', registration);
+                })
+                .catch(error => {
+                    console.log('SW Registration failed:', error);
+                });
+        });
+    }
 
     function getStorage() { return JSON.parse(localStorage.getItem('moodStampCollection')) || {}; }
 
